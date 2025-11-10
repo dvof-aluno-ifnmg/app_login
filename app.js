@@ -1,64 +1,76 @@
-const SUPABASE_URL = 'https://mpdfhlsjovouxppgtxaz.supabase.co'; 
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1wZGZobHNqb3ZvdXhwcGd0eGF6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI0Mzc5MzMsImV4cCI6MjA3ODAxMzkzM30.IQ3vMR4wJggsE34bucum0ayBU58bSbu0CXaFhpDkGFw';
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+// =============================================================
+// ARQUIVO app.js PARA FIREBASE
+// =============================================================
 
+// 1. Cole aqui o objeto de configuração que você copiou do Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyDcbYCpHMYWLwtx16Zs5PxezEzDsaw-mEo",
+  authDomain: "login-app-da821.firebaseapp.com",
+  projectId: "login-app-da821",
+  storageBucket: "login-app-da821.firebasestorage.app",
+  messagingSenderId: "634305233699",
+  appId: "1:634305233699:web:bfe42ab6c5fe2cbe8ac296"
+};
+
+
+// 2. Inicializa o Firebase
+firebase.initializeApp(firebaseConfig);
+
+// 3. Cria uma referência para o serviço de autenticação
+const auth = firebase.auth();
+
+
+// --- Lógica de Cadastro ---
 const formCadastro = document.getElementById('form-cadastro');
+
 if (formCadastro) {
-    formCadastro.addEventListener('submit', async (evento) => {
+    formCadastro.addEventListener('submit', (evento) => {
         evento.preventDefault(); // Impede o recarregamento da página
 
         const email = evento.target.email.value;
-        const senha = evento.target.password.value; // Nome do campo 'password'
+        const senha = evento.target.password.value;
 
-        const { data, error } = await supabase.auth.signUp({
-            email: email,
-            password: senha
-        });
-
-        if (error) {
-            alert("Erro ao cadastrar: " + error.message);
-            console.error(error); // Para debug
-        } else {
-            alert("Usuário cadastrado com sucesso! Faça o login.");
-            window.location.href = "index.html"; // Redireciona para a página de login
-        }
+        // Função de cadastro do Firebase
+        auth.createUserWithEmailAndPassword(email, senha)
+            .then((userCredential) => {
+                // Cadastro bem-sucedido
+                alert("Usuário cadastrado com sucesso! Faça o login.");
+                window.location.href = "index.html"; // Redireciona para o login
+            })
+            .catch((error) => {
+                // Trata os erros
+                alert("Erro ao cadastrar: " + error.message);
+                console.error("Erro de cadastro:", error);
+            });
     });
 }
+
+
 // --- Lógica de Login ---
 const formLogin = document.getElementById('form-login');
 
 if (formLogin) {
-    formLogin.addEventListener('submit', async (evento) => {
+    formLogin.addEventListener('submit', (evento) => {
         evento.preventDefault();
 
         const email = evento.target.email.value;
-        const senha = evento.target.password.value; // Nome do campo 'password'
+        const senha = evento.target.password.value;
 
-        const { data, error } = await supabase.auth.signInWithPassword({
-            email: email,
-            password: senha
-        });
+        // Função de login do Firebase
+        auth.signInWithEmailAndPassword(email, senha)
+            .then((userCredential) => {
+                // Login bem-sucedido
+                const user = userCredential.user;
+                alert("Login realizado com sucesso! Bem-vindo, " + user.email);
 
-        if (error) {
-            alert("Erro ao logar: " + error.message);
-            console.error(error); // Para debug
-        } else {
-            alert("Login realizado com sucesso!");
-            // Redireciona para uma página de dashboard, por exemplo
-            // window.location.href = "dashboard.html"; 
-            console.log("Usuário logado:", data.user);
-        }
+                // DESAFIO: Criar um 'dashboard.html' e redirecionar para ele
+                // window.location.href = "dashboard.html";
+                console.log("Usuário logado:", user);
+            })
+            .catch((error) => {
+                // Trata os erros (senha errada, usuário não encontrado)
+                alert("Erro ao logar: Por favor, verifique seu e-mail e senha.");
+                console.error("Erro de login:", error.message);
+            });
     });
-}
-
-// Opcional: Adicionar lógica para verificar sessão e redirecionar
-async function checkUser() {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-        console.log("Usuário já logado:", user.email);
-        // Ex: window.location.href = "dashboard.html";
-    } else {
-        console.log("Nenhum usuário logado.");
-    }
-}
-// checkUser(); // Descomente se quiser verificar o login ao carregar a página
+}   
