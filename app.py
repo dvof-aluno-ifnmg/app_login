@@ -1,4 +1,2 @@
-def func(name):
-    print(name)
-
-func("none")
+class controls:
+    def __init__():
